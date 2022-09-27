@@ -1,2 +1,2 @@
-# goProject
-go项目
+# Simple_Go_Web
+go web
