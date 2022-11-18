@@ -1,0 +1,44 @@
+1、什么是 AOP ？ 
+AOP (Aspect Oriented Programming)，面向切面编程。核心在于将横向关注点从业务中剥离出来。
+横向关注点：就是那些跟业务没啥关系，但是每个业务又必须要处理的。常见的有几类：
+• 可观测性：logging、metric 和 tracing
+• 安全相关：登录、鉴权与权限控制
+• 错误处理：例如错误页面支持
+• 可用性保证：熔断限流和降级等
+基本上 Web 框架都会设计自己的 AOP 方案
+
+2、什么是洋葱模式？
+形如洋葱，拥有一个核心，这个核心一般就是业务逻辑。而后在这个核心外面层层包裹，每一层就是一个 Middleware。一般用洋葱模式来无侵入式地增强核心功能，或者解决AOP问题。
+
+3、什么是责任链模式？
+不同的 Handler 组成一条链，链条上的每一环都有自己功能。一方面可以用责任链模式将复杂逻辑分成链条上的不同步骤，另外一方面也可以灵活地在链条上添加新的Handelr。
+
+4、怎么实现？
+AOP 方案在不同框架，不同语言里面都有不同的叫法，比如Middleware, Handler, Chain, Filter, Filter-Chain, Interceptor, Wrapper
+
+最简单的方案就是函数式方案：
+type Middleware func(next HandleFunc) HandleFunc
+
+还有一种是类似gin那种半集中调度的模式，由 Context 来调度。但也是实现者在 HandlerFunc 里面主动调用下一个！
+
+完全的集中式，是由一个中央管理器之类的统一调度各种Filter 或者 Handler，在中间件设计里面不常用。
+
+//还有下面这种变种
+type HandleFunc1 func(ctx *Context) (next bool)
+//和gin类似  集中式
+type Chain []HandleFunc1
+
+
+type ChainV1 struct {
+	handlers []HandleFunc1
+}
+
+func (c ChainV1 ) Run(ctx *Context)  {
+	for _, h := range c.handlers{
+		next := h(ctx)
+		//中断
+		if !next{
+			return
+		}
+	}
+}
