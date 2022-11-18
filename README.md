@@ -1,2 +1,1 @@
-# Simple_Go_Web
-go web
+# 核心知识点总结
