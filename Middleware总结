@@ -1,0 +1,59 @@
+1. 什么是可观测性？
+1)在日常工作中，我们可能希望能够记录所有进来的请求，以支持 DEBUG，也就是 logging。
+2)Tracing：踪迹，它记录从收到请求到返回响应的整个过程。在分布式环境下，一般代表着请求从Web 收到，沿着后续微服也就是 logging、metrics 和 tracing。
+3）Metrics可以记录一些可观测性指标。
+虽然很多公司内部有自研的框架，但是在开源里面，Prometheus 应该算是用户最多的框架。OpenTelemetry 适配了 Prometheus，但是我们可以额外提供一个 Prometheus 的 Middleware，看看 Prometheus 的效果。
+
+Prometheus Metrics 类型：
+• Counter：计数器，统计次数，比如说某件事发生了多少次
+• Gauge：度量，它可以增加也可以减少，比如说当前正在处理的请求数
+• Histogram：柱状图，对观察对象进行采样，然后分到一个个桶里面
+• Summary：采样点按照百分位进行统计，比如 99线、999 线等
+Prometheus 一般是和 Grafana 结合使用，Grafana作为数据展示平台
+
+2. 常用的可观测性的框架有哪些？
+你举例自己公司用的，开源的 OpenTelemetry、SkyWalking、Prometheus。
+
+3. 怎么集成可观测性框架？
+一般都是利用 Middleware 机制，不仅仅是 Web 框架，几乎所有的框架都有类似 Middleware 的机制。
+
+4. Prometheus 的 Histogram 和 Summary？
+
+
+5. 全链路追踪（tracing）的几个概念？
+解释一下 tracer、tracing 和 span 的概念。
+
+1) tracer：表示用来记录 trace（踪迹）的实例，一般来说，tracer 会有一个对应的接口。
+
+trace 不仅仅包含服务调用信息，实际上整条链路上的信息都可能包含在内，包括：
+• RPC 调用
+• HTTP 调用
+• 数据库查询
+• 发送消息
+• 业务步骤
+这些步骤，也可以进一步被细分，分成更加细的span。
+
+2) span：代表 trace 中的一段。因此 trace 本身也可以看做是一个 span。span 本身是一个层级概念，因此有父子关系。一个 trace 的 span可以看做是多叉树。
+
+目前在业界里面， tracing 工具还处于百花齐放阶段，有很多开源实现，例如 SkyWalking、Zipkin、Jeager等。
+
+我之前设计了一个middleware, 使用的 OpenTelemetry + Zipkin 来实现tracing:
+OpenTelemetry 是 OpenTracing 和 OpenCensus合并而来。
+• OpenTelemetry 同时支持了 logging、tracing 和metrics
+• OpenTelemetry 提供了各种语言的 SDK
+• OpenTelemetry 适配了各种开源框架，如Zipkin、Jeager、Prometheus
+
+核心就是利用Zipkin构造出一个 TracerProvider，并且调用 otel.SetTracerProvider进行链路跟踪。
+
+6. tracing 是怎么构建的？
+核心在于解释清楚 tracing 进程内和跨进程的运作，我们将在微服务框架里面看到跨进程是怎么处理的。
+
+在同一进程内，因为span 本身是一个层级概念，因此有父子关系。
+首先为了和上游链路的trace结合在一起， 也就是发起http请求的客户端， middleware里要首先封装下reqCtx，生成一个新的context.Context, 同一层级的用
+用同一父级的context.Context， 儿子用父亲的context.Context来实现进程内协作。
+
+7. HTTP 应该观测一些什么数据？
+请求方法、url、schema(http/https)、对端地址等。根据 匹配的路由、返回的状态码、http.Method等统计99线、999 线等
+
+8. 什么是 99 线、999线？
+就是响应的比例，99% 的响应、99.9 % 的响应的响应时间在多少以内。
