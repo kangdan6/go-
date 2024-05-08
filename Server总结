@@ -28,8 +28,17 @@ r.query r.header 底层都是map[string][]string
 
 使用r.Form之前要先调用r.ParseForm()
 
+原生http不好用，所以需要自己封装一下，那就包括：
+1、Http Server的抽象,是一种逻辑上的抽象，代表的是对某个端口进行监听的实体，必要的时候，也可以开启多个Server,来监听多个端口
+主要实现两个方法，Route用于注册路由，一个Start用于启动服务
 
-
+接口就是一种行为的抽象
+```
+type Server interface {
+	Route(pattern string, handlerFunc http.HandlerFunc)
+	Start(address string) error
+}
+```
 
 
 HTTP 服务器的生命周期？
