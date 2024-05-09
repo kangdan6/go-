@@ -1,7 +1,7 @@
 1、什么是 AOP ？ 
 AOP (Aspect Oriented Programming)，面向切面编程。核心在于将横向关注点从业务中剥离出来。
-横向关注点：就是那些跟业务没啥关系，但是每个业务又必须要处理的。常见的有几类：
-• 可观测性：logging、metric 和 tracing
+横向关注点：就是那些跟业务没啥关系，但是所有接口都必须要处理的。常见的有几类：
+• 可观测性：logging(打印请求参数、返回值等)、metric 和 tracing
 • 安全相关：登录、鉴权与权限控制
 • 错误处理：例如错误页面支持
 • 可用性保证：熔断限流和降级等
@@ -13,8 +13,10 @@ AOP (Aspect Oriented Programming)，面向切面编程。核心在于将横向�
 3、什么是责任链模式？
 不同的 Handler 组成一条链，链条上的每一环都有自己功能。一方面可以用责任链模式将复杂逻辑分成链条上的不同步骤，另外一方面也可以灵活地在链条上添加新的Handelr。
 
+责任链是一种很常见的用于解决AOP的一种方式
+
 4、怎么实现？
-AOP 方案在不同框架，不同语言里面都有不同的叫法，比如Middleware, Handler, Chain, Filter, Filter-Chain, Interceptor, Wrapper
+AOP 方案在不同框架，不同语言里面都有不同的叫法，比如Middleware, Handler, Chain, Filter（用一个map存储，挨个遍历执行）, Filter-Chain, Interceptor（比如Python Flask里 BeforeRequest,BeforeResponse, After等）, Wrapper
 
 最简单的方案就是函数式方案：
 type Middleware func(next HandleFunc) HandleFunc
